@@ -71,6 +71,8 @@ public class Calculator implements ICalculator {
 			case ADD:
 				// pop last 2 tokens and compute
 				leftAcc = rightAcc + leftAcc;
+				// after a left side calc - the next token is on the right
+				positionLeft = false;
 				break;
 			default:
 				if(positionLeft) {
@@ -97,7 +99,7 @@ public class Calculator implements ICalculator {
 			StringTokenizer tokenizer = new StringTokenizer(truncLine, "(");
 			while(tokenizer.hasMoreTokens()) {
 				String token = tokenizer.nextToken();
-				LOGGER.log(Level.FINEST, "token: " + token);
+				LOGGER.log(Level.INFO, "token: " + token);
 				splitCopyOnWriteArrayList.add(token);
 			}
 		}

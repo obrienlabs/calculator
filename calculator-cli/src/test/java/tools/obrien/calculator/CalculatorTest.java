@@ -36,4 +36,21 @@ public class CalculatorTest {
 		assertEquals(expected, result);
 	}
 
+	@Test
+	public void testResursionLevel1() {
+		String input = "add(4, add(1, 2 )) ";
+		Double expected = 7D;
+		Double result = calculator.parse(input);
+		assertNotNull(result);
+		assertEquals(expected, result);
+	}
+
+	@Test
+	public void testResursionLevel3() {
+		String input = "add(16, add(8, add(4, add(1, 2 )))) ";
+		Double expected = 31D;
+		Double result = calculator.parse(input);
+		assertNotNull(result);
+		assertEquals(expected, result);
+	}
 }
