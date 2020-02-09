@@ -14,10 +14,16 @@
   <dependencies>
     <dependency>
         <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-engine</artifactId>
+        <artifactId>junit-jupiter</artifactId>
         <version>5.4.0</version>
         <scope>test</scope>
     </dependency>
+    <!-- required to run junits directly in STS outside of mvn -->
+     <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-commons</artifactId>
+            <version>1.5.2</version>
+ </dependency>
     
   </dependencies>
   <build>
@@ -39,7 +45,8 @@
             <dependencies>
                 <dependency>
                     <groupId>org.junit.jupiter</groupId>
-                    <artifactId>junit-jupiter-engine</artifactId>
+                    <!--  artifactId>junit-jupiter-engine</artifactId-->
+                    <artifactId>junit-jupiter</artifactId>
                     <version>5.4.0</version>
                 </dependency>
             </dependencies>

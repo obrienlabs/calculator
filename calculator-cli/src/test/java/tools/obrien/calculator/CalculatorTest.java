@@ -1,5 +1,6 @@
 package tools.obrien.calculator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
@@ -27,14 +28,12 @@ public class CalculatorTest {
 	private final Calculator calculator = new Calculator();
 	
 	@Test
-	public void test() {
-		// iterate over a fixed range of numerics
-		//https://www.deadcoderising.com/2015-05-19-java-8-replace-traditional-for-loops-with-intstreams/
-		// print a range of numbers
-		System.out.println("\nrange of numbers");
-		IntStream.range(1, 9).forEach(i -> System.out.print("," + i)); // 1,2,3,4,5,6,7,8,9
-		assertNotNull(calculator);
-
+	public void testResursionLevel0() {
+		String input = "add(1, 2 ) ";
+		String expected = "3";
+		String result = calculator.parse(input);
+		assertNotNull(result);
+		assertEquals(expected, result);
 	}
 
 }
