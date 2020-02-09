@@ -30,8 +30,8 @@ public class CalculatorTest {
 	@Test
 	public void testResursionLevel0() {
 		String input = "add(1, 2 ) ";
-		String expected = "3";
-		String result = calculator.parse(input);
+		Double expected = 3D;
+		Double result = calculator.parse(input);
 		assertNotNull(result);
 		assertEquals(expected, result);
 	}
