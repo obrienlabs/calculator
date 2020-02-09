@@ -1,2 +1,1 @@
-# calculator
-CLI Calculator
+# Calculator
