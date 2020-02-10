@@ -37,6 +37,9 @@ public class Calculator implements ICalculator {
     /** parallelStreams need thread safe ArrayLists */
 	private List<String> splitCopyOnWriteArrayList = new CopyOnWriteArrayList<>();
 	
+	// no generics yet
+	private BinaryTree tree = new BinaryTreeImpl();
+	
 	public static final String ADD = "add";
 	public static final String SUB = "sub";
 	public static final String DIV = "div";
