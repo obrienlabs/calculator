@@ -1,21 +1,12 @@
 package tools.obrien.calculator;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * This class implements a lexical CLI calculator
@@ -35,8 +26,6 @@ public class Calculator implements ICalculator {
 
 	/** parallelStreams need thread safe HashMaps */
 	private Map<Long, String> concurrentHashMap = new ConcurrentHashMap<>();
-    /** parallelStreams need thread safe ArrayLists */
-	private List<String> splitCopyOnWriteArrayList = new CopyOnWriteArrayList<>();
 	
 	// no generics yet
 	private BinaryTree tree = new BinaryTreeImpl();
@@ -71,27 +60,17 @@ public class Calculator implements ICalculator {
 		String filteredExpression = removeWhitespace(expression);
 		
 		// split based on comma and brackets - then use RPN to evaluate in reverse
-		List<String> splitList = splitByDelimiter(filteredExpression);//, "(),");
-		// tokenize elements
-		//splitList.stream().forEach(splitConsumer);
-		// reverse list for RPN
-		//Collections.reverse(splitCopyOnWriteArrayList);
-		// insert binary tree nodes
-		//splitList.stream().forEach(splitConsumer);
+		List<String> splitList = splitByDelimiter(filteredExpression);
 		tokenize(splitList);
 		
 		// evaluate operations
-		//splitCopyOnWriteArrayList.stream().forEach(calcConsumer);
 		Double result = evaluateTree();
-		//Double result = leftAcc;
 		LOGGER.log(Level.INFO, "result: " + result);
 		return result;
 	}
 	
 	private Double evaluateTree() {
-		//Double result = 0D;
 		List<Node> nodes = tree.postOrderTraversal();
-		//nodes.stream().forEach(i -> System.out.print("," + i.getValue()));
 		Double left = 0D;
 		Double right = 0D;
 		boolean isLeft = true;
@@ -105,19 +84,15 @@ public class Calculator implements ICalculator {
 				switch(node.getOperator()) {
 				case ADD:
 					acc = left + right;
-					//left = acc;
 					break;
 				case SUB:
 					acc = left - right;
-					//left = acc;
 					break;
 				case MULT:
 					acc = left * right;
-					//left = acc;
 					break;
 				case DIV:
 					acc = left / right;
-					//left = acc;
 					break;
 				default:
 				}
@@ -125,12 +100,6 @@ public class Calculator implements ICalculator {
 				values = values.subList(0, values.size() - 2);
 				values.add(acc);
 			} else {
-				/*if(isLeft) {
-					left = node.getValue();
-				} else {
-					right = node.getValue();
-					isLeft = true;
-				}*/
 				values.add(node.getValue());
 			}
 		}
@@ -158,33 +127,21 @@ public class Calculator implements ICalculator {
 			}
 		}
 	};	
-	
-	/*Consumer<String> splitConsumer = new Consumer<String>() {
-		public void accept(String line) {
-			tokenize(line); 
-		}
-	};*/
-	
-	
+
 	private Node insertNode(Node node, Node currentNode, boolean isDirective, boolean navLeft, boolean navRight) {
-		//Node nextNode = currentNode;
 		if(null == currentNode) {
 			tree.insert(node, true);
-			//nextNode = node;
 		} else {
 			if(navLeft) {
 				currentNode.setLeft(node);
-				//nextNode = node;
 			}
 			if(navRight) {
 				currentNode.getParent().setRight(node);
-				//nextNode = node;
 			}
 		}
 		return node;
 	}
 	
-	//private void tokenize(String pos) {
 	private void tokenize(List<String> list) {
 		Node currentNode = tree.getRoot();
 		
@@ -192,58 +149,39 @@ public class Calculator implements ICalculator {
 		boolean navRight = false;
 		
 		for(String pos : list) {
-		switch(pos) {
-		case ADD:
-		case SUB:
-		case MULT:
-		case DIV:
-			currentNode = insertNode(new NodeImpl(pos), currentNode, false, navLeft, navRight);
-			break;
-		case LB:
-			navLeft = true;
-			navRight = false;			
-			break;
-		case RB:
-			currentNode = currentNode.getParent();
-			navLeft = false;
-			navRight = false;
-			break;
-		case CO:
-			navRight = true;
-			navLeft = false;
-			break;
-		default:
-			currentNode = insertNode(new NodeImpl(Double.valueOf(pos)), currentNode, false, navLeft, navRight);
-			break;
-		}
-		}
-	}
-	
-	
-	/*private void tokenize(String line) {
-		if(null != line) {
-			// remove closing brackets
-			String truncLine = line.replaceAll("\\)", "");
-			StringTokenizer tokenizer = new StringTokenizer(truncLine, "(");
-			while(tokenizer.hasMoreTokens()) {
-				String token = tokenizer.nextToken();
-				LOGGER.log(Level.FINE, "token: " + token);
-				splitCopyOnWriteArrayList.add(token);
+			switch(pos) {
+			case ADD:
+			case SUB:
+			case MULT:
+			case DIV:
+				currentNode = insertNode(new NodeImpl(pos), currentNode, false, navLeft, navRight);
+				break;
+			case LB:
+				navLeft = true;
+				navRight = false;			
+				break;
+			case RB:
+				currentNode = currentNode.getParent();
+				navLeft = false;
+				navRight = false;
+				break;
+			case CO:
+				navRight = true;
+				navLeft = false;
+				break;
+			default:
+				currentNode = insertNode(new NodeImpl(Double.valueOf(pos)), currentNode, false, navLeft, navRight);
+				break;
 			}
 		}
-	}*/
+	}
 	
 	private String removeWhitespace(String expression) {
 		return expression.replaceAll(" ", "");
 	}
 	
-	private List<String> splitByDelimiter(String expression) {//, String delimiter) {
-		/*return Stream.of(expression.split(delimiter))
-				.map(elem -> new String(elem))
-				.collect(Collectors.toList());*/
+	private List<String> splitByDelimiter(String expression) {
 		List<String> list = new ArrayList<>();
-		//Collections.addAll(list, expression.split("\(,)"));
-		
 
 		StringBuffer buffer = new StringBuffer();
 		for(int i=0; i<expression.length(); i++) {

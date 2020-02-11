@@ -79,20 +79,4 @@ public class NodeImpl implements Node  {
 		nodes.add(this);
 	}
 
-	
-	/*@Override
-	public Double operate() {
-		if(isOperator()) {
-			switch(operator) {
-			case Calculator.ADD:
-				// pop last 2 tokens and compute
-				return left + right;
-				break;
-			default:
-				return null;
-			}
-		}
-		return null;
-	}*/
-
 }

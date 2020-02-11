@@ -20,7 +20,6 @@ public interface Node {
 	Boolean isOperator();
 	String getOperator();
 	
-	//Double operate();
 	void postOrderTraversal(List<Node> nodes);
 	
 }
