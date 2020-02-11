@@ -3,6 +3,7 @@ package tools.obrien.calculator;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -39,33 +40,102 @@ public class Calculator implements ICalculator {
 	
 	// no generics yet
 	private BinaryTree tree = new BinaryTreeImpl();
+	//private Node rootNode;
 	
 	public static final String ADD = "add";
 	public static final String SUB = "sub";
 	public static final String DIV = "div";
 	public static final String MULT = "mult";
 	public static final String LET = "let";
+	public static final String LB = "(";
+	public static final String RB = ")";
+	public static final String CO = ",";
 	
 	private Double leftAcc = 0D;
 	private Double rightAcc = 0D;
 	// flip between left and right operands as we RPN parse
 	private boolean positionLeft = true;
 	
+	/**
+	 * The expression is split based on non-alphanumeric characters
+	 * IE: add(1,add(2,3)) splits as add ( 1 , add ( 2 , 3 ) )
+	 * where ( = left subtree
+	 * , sibling right branch
+	 * ) = traversal to parent
+	 * 
+	 * @param expression
+	 * @return
+	 */
 	public Double parse(String expression) {
 		LOGGER.log(Level.INFO, "expression: " + expression);
 		String filteredExpression = removeWhitespace(expression);
 		
-		// split based on comma - then use RPN to evaluate in reverse
-		List<String> splitList = splitByDelimiter(filteredExpression, ",");
+		// split based on comma and brackets - then use RPN to evaluate in reverse
+		List<String> splitList = splitByDelimiter(filteredExpression);//, "(),");
 		// tokenize elements
-		splitList.stream().forEach(splitConsumer);
+		//splitList.stream().forEach(splitConsumer);
 		// reverse list for RPN
-		Collections.reverse(splitCopyOnWriteArrayList);
+		//Collections.reverse(splitCopyOnWriteArrayList);
+		// insert binary tree nodes
+		//splitList.stream().forEach(splitConsumer);
+		tokenize(splitList);
+		
 		// evaluate operations
-		splitCopyOnWriteArrayList.stream().forEach(calcConsumer);
-		Double result = leftAcc;
+		//splitCopyOnWriteArrayList.stream().forEach(calcConsumer);
+		Double result = evaluateTree();
+		//Double result = leftAcc;
 		LOGGER.log(Level.INFO, "result: " + result);
 		return result;
+	}
+	
+	private Double evaluateTree() {
+		//Double result = 0D;
+		List<Node> nodes = tree.postOrderTraversal();
+		//nodes.stream().forEach(i -> System.out.print("," + i.getValue()));
+		Double left = 0D;
+		Double right = 0D;
+		boolean isLeft = true;
+		Double acc = 0D;
+		// iterate until we get to an op, then replace last 3 with eval
+		List<Double> values = new ArrayList<>();
+		for(Node node : nodes) {
+			if(node.isOperator()) {
+				left = values.get(values.size() - 2);
+				right = values.get(values.size() - 1);
+				switch(node.getOperator()) {
+				case ADD:
+					acc = left + right;
+					//left = acc;
+					break;
+				case SUB:
+					acc = left - right;
+					//left = acc;
+					break;
+				case MULT:
+					acc = left * right;
+					//left = acc;
+					break;
+				case DIV:
+					acc = left / right;
+					//left = acc;
+					break;
+				default:
+				}
+				// truncate/replace list
+				values = values.subList(0, values.size() - 2);
+				values.add(acc);
+			} else {
+				/*if(isLeft) {
+					left = node.getValue();
+				} else {
+					right = node.getValue();
+					isLeft = true;
+				}*/
+				values.add(node.getValue());
+			}
+		}
+		
+		return values.get(0);
 	}
 	
 	Consumer<String> calcConsumer = new Consumer<String>() {
@@ -89,33 +159,112 @@ public class Calculator implements ICalculator {
 		}
 	};	
 	
-	Consumer<String> splitConsumer = new Consumer<String>() {
+	/*Consumer<String> splitConsumer = new Consumer<String>() {
 		public void accept(String line) {
 			tokenize(line); 
 		}
-	};
+	};*/
 	
-	private void tokenize(String line) {
+	
+	private Node insertNode(Node node, Node currentNode, boolean isDirective, boolean navLeft, boolean navRight) {
+		//Node nextNode = currentNode;
+		if(null == currentNode) {
+			tree.insert(node, true);
+			//nextNode = node;
+		} else {
+			if(navLeft) {
+				currentNode.setLeft(node);
+				//nextNode = node;
+			}
+			if(navRight) {
+				currentNode.getParent().setRight(node);
+				//nextNode = node;
+			}
+		}
+		return node;
+	}
+	
+	//private void tokenize(String pos) {
+	private void tokenize(List<String> list) {
+		Node currentNode = tree.getRoot();
+		
+		boolean navLeft = false;
+		boolean navRight = false;
+		
+		for(String pos : list) {
+		switch(pos) {
+		case ADD:
+		case SUB:
+		case MULT:
+		case DIV:
+			currentNode = insertNode(new NodeImpl(pos), currentNode, false, navLeft, navRight);
+			break;
+		case LB:
+			navLeft = true;
+			navRight = false;			
+			break;
+		case RB:
+			currentNode = currentNode.getParent();
+			navLeft = false;
+			navRight = false;
+			break;
+		case CO:
+			navRight = true;
+			navLeft = false;
+			break;
+		default:
+			currentNode = insertNode(new NodeImpl(Double.valueOf(pos)), currentNode, false, navLeft, navRight);
+			break;
+		}
+		}
+	}
+	
+	
+	/*private void tokenize(String line) {
 		if(null != line) {
 			// remove closing brackets
 			String truncLine = line.replaceAll("\\)", "");
 			StringTokenizer tokenizer = new StringTokenizer(truncLine, "(");
 			while(tokenizer.hasMoreTokens()) {
 				String token = tokenizer.nextToken();
-				LOGGER.log(Level.INFO, "token: " + token);
+				LOGGER.log(Level.FINE, "token: " + token);
 				splitCopyOnWriteArrayList.add(token);
 			}
 		}
-	}
+	}*/
 	
 	private String removeWhitespace(String expression) {
 		return expression.replaceAll(" ", "");
 	}
 	
-	private List<String> splitByDelimiter(String expression, String delimiter) {
-		return Stream.of(expression.split(delimiter))
+	private List<String> splitByDelimiter(String expression) {//, String delimiter) {
+		/*return Stream.of(expression.split(delimiter))
 				.map(elem -> new String(elem))
-				.collect(Collectors.toList());
+				.collect(Collectors.toList());*/
+		List<String> list = new ArrayList<>();
+		//Collections.addAll(list, expression.split("\(,)"));
+		
+
+		StringBuffer buffer = new StringBuffer();
+		for(int i=0; i<expression.length(); i++) {
+			char ch = expression.charAt(i);
+			switch (ch) {
+				case '(': // insert subtree right
+				case ')': // back up to parent
+				case ',': // insert adjacent right
+					if(buffer.length() > 0) {
+						list.add(buffer.toString());
+						buffer = new StringBuffer();
+					}
+					// in all cases even after a ) - write a ,
+					list.add(String.valueOf(ch));
+					break;
+				default:
+					buffer.append(ch);
+			}
+		}
+		return list;	
+		
 	}
 	
 	public Map<Long, String> getConcurrentHashMap() {

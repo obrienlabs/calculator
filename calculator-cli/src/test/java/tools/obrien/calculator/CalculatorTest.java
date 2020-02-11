@@ -24,6 +24,14 @@ public class CalculatorTest {
 	}
 
 	@Test
+	public void testResursionLevel0Sub() {
+		String input = "sub(5,3 ) ";
+		Double expected = 2D;
+		Double result = calculator.parse(input);
+		assertNotNull(result);
+		assertEquals(expected, result);
+	}
+	@Test
 	public void testResursionLevel1() {
 		String input = "add(4, add(1, 2 )) ";
 		Double expected = 7D;
@@ -40,13 +48,22 @@ public class CalculatorTest {
 		assertNotNull(result);
 		assertEquals(expected, result);
 	}
+
+	@Test
+	public void testResursionLevel1Left() {
+		String input = "add(add(1, 2 ),4) ";
+		Double expected = 7D;
+		Double result = calculator.parse(input);
+		assertNotNull(result);
+		assertEquals(expected, result);
+	}
 	
-	/*@Test
+	@Test
 	public void testResursionLevel3Left() {
 		String input = "add(add(add(add(1, 2 ),4),8), 16) ";
 		Double expected = 31D;
 		Double result = calculator.parse(input);
 		assertNotNull(result);
 		assertEquals(expected, result);
-	}*/
+	}
 }
